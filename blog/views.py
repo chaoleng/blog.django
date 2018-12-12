@@ -7,24 +7,35 @@ from django.template import loader
 from django.http import Http404
 from django.shortcuts import get_object_or_404,render
 from django.urls import reverse
+from django.views import generic
 
-def index(request):
-    latest_question_list = Question.objects.order_by('-pub_date')[:5]
-    template = loader.get_template('blog/index.html')
-    context = {
-        'latest_question_list': latest_question_list,
-    }
-    return HttpResponse(template.render(context, request))
 
-def detail(request,question_id):
+class IndexView(generic.ListView):
+    # latest_question_list = Question.objects.order_by('-pub_date')[:5]
+    # template = loader.get_template('blog/index.html')
+    # context = {
+    #     'latest_question_list': latest_question_list,
+    # }
+    # return HttpResponse(template.render(context, request))
+    # 上には古いですviews
+    template_name = 'blog/index.html'
+    context_object_name = 'latest_question_list'
+    def get_queryset(self):
+        """Return the last five published questions."""
+        return Question.objects.order_by('-pub_date')[:5]
+ 
+class DetailView(generic.DetailView):
     # return HttpResponse("You're looking at question" %question_id)
-    question = get_object_or_404(Question, pk=question_id)
-    return render(request, 'blog/detail.html', {'question': question})
-def results(request,question_id):
+    # question = get_object_or_404(Question, pk=question_id)
+    # return render(request, 'blog/detail.html', {'question': question})
+    model = Question
+    template_name = 'blog/detail.html'
+
+class ResultsView(generic.DetailView):
     # response = "You're lokking at the results of question %s."
     # return HttpResponse(response % question_id)
-    question = get_object_or_404(Question,pk=question_id)
-    return render(request,'blog/results.html',{'question':question})
+    model = Question
+    template_name = 'blog/results.html'
 
 def vote(request, question_id):
     question = get_object_or_404(Question, pk=question_id)
